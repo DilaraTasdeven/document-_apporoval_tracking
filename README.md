@@ -1,2 +1,7 @@
 # document-_apporoval_tracking
-Biga Bilişim bünyesinde geliştirilen, kurum içi belge onay süreçlerini dijitalleştiren takip sistemi.
+
+##Proje Hakkında
+Bu Proje , *Biga Bilişim* bünyesinde staj dönemi kapsamında geliştirilmiştir.
+
+# Geliştirici: Dilara Taşdeven
+# Kurum: Biga Bilişim
