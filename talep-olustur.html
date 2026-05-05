@@ -1,0 +1,796 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Talep Oluştur | Dijital Onay Zinciri</title>
+  <style>
+    :root {
+      --bg: #f4f9f8;
+      --panel: #ffffff;
+      --ink: #173042;
+      --muted: #5f7384;
+      --line: #d6e6ed;
+      --accent: #0c8f87;
+      --accent-soft: #d5f5f2;
+      --danger: #d9534f;
+      --ok: #128b4a;
+      --radius: 16px;
+      --shadow: 0 14px 30px rgba(12, 143, 135, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Trebuchet MS", "Segoe UI", "Candara", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1000px 450px at -15% -25%, #d9f7ef 0%, transparent 70%),
+        radial-gradient(900px 450px at 110% -15%, #ffe9d1 0%, transparent 70%),
+        var(--bg);
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    .top-nav {
+      max-width: 1200px;
+      margin: 0 auto 14px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      text-decoration: none;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      transition: .2s ease;
+    }
+
+    .nav-link:hover {
+      transform: translateY(-1px);
+      border-color: #9bc6d3;
+      background: #f5fcff;
+    }
+
+    .nav-link.active {
+      color: #0a6f69;
+      background: #ddf6f3;
+      border-color: #8bd8d2;
+    }
+
+    .nav-spacer {
+      flex: 1 1 auto;
+    }
+
+    .nav-user {
+      align-self: center;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 0 4px;
+    }
+
+    .nav-btn {
+      appearance: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .card-header {
+      padding: 18px 18px 12px;
+      border-bottom: 1px dashed var(--line);
+      background: linear-gradient(180deg, #ffffff 0%, #f9fefd 100%);
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      letter-spacing: 0.2px;
+    }
+
+    h1 { font-size: 1.35rem; }
+
+    .subtitle {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .content {
+      padding: 18px;
+      display: grid;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    input, select, textarea {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 11px;
+      font-size: 0.92rem;
+      color: var(--ink);
+      background: #fff;
+      outline: none;
+      transition: border-color .2s ease, box-shadow .2s ease;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    textarea {
+      min-height: 86px;
+      resize: vertical;
+      line-height: 1.35;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(12, 143, 135, 0.14);
+    }
+
+    .step-builder {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fcfffe;
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .step-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(120px, auto);
+      gap: 8px;
+    }
+
+    .btn {
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.85rem;
+      transition: .2s ease;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 14px rgba(12, 143, 135, 0.24);
+    }
+
+    .btn-start {
+      background: #1f9f5f;
+      color: #fff;
+    }
+
+    .btn-start:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 14px rgba(31, 159, 95, 0.24);
+    }
+
+    .step-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .step-item {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      padding: 10px;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .step-no {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      color: #0f6d67;
+      display: grid;
+      place-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .step-meta p {
+      margin: 0;
+      font-size: 0.84rem;
+      overflow-wrap: anywhere;
+    }
+
+    .step-meta p:first-child { font-weight: 700; }
+    .step-meta p:last-child { color: var(--muted); margin-top: 2px; }
+
+    .step-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .mini {
+      font-size: 0.76rem;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #f8fbff;
+      cursor: pointer;
+    }
+
+    .mini.delete {
+      color: var(--danger);
+      border-color: #f7c5c3;
+      background: #fff3f3;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .preview-section {
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .summary {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      background: #fbfefe;
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .summary p { margin: 0; font-size: 0.88rem; }
+    .summary b { color: #10455f; }
+
+    .flow {
+      display: grid;
+      gap: 8px;
+    }
+
+    .flow-item {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      background: #fff;
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      min-width: 0;
+    }
+
+    .flow-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #e8f5ff;
+      color: #0d607d;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: grid;
+      place-content: center;
+      margin-top: 2px;
+    }
+
+    .flow-item p { margin: 0; font-size: 0.85rem; }
+    .flow-item p:first-child { font-weight: 700; }
+    .flow-item p:last-child { color: var(--muted); margin-top: 2px; }
+
+    .empty {
+      color: var(--muted);
+      font-size: 0.88rem;
+      margin: 0;
+      padding: 10px;
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      background: #fcffff;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      background: #eef9f8;
+      color: #0f6d67;
+      border: 1px solid #cde9e6;
+    }
+
+    .preview-note {
+      margin: 0;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d4e6e2;
+      background: #f7fffd;
+      color: #2f5d57;
+      font-size: 0.83rem;
+    }
+
+    .version-badge {
+      position: fixed;
+      right: 12px;
+      bottom: 10px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid #c5e2dd;
+      background: rgba(255, 255, 255, 0.92);
+      color: #2e6c65;
+      font-size: 0.76rem;
+      font-weight: 700;
+      backdrop-filter: blur(3px);
+      z-index: 20;
+    }
+
+    @media (max-width: 1180px) {
+      .page { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 980px) {
+      .step-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 760px) {
+      .field-grid,
+      .step-grid { grid-template-columns: 1fr; }
+
+      body { padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="top-nav" id="roleNav"></nav>
+
+  <main class="page">
+    <section class="card">
+      <header class="card-header">
+        <h1>Talep Olusturma ve Onay Rotasi Tanimi</h1>
+        <p class="subtitle">Kullanici belgeyi gonderirken onay zincirini en bastan tanimlar.</p>
+      </header>
+
+      <div class="content">
+        <div class="field-grid">
+          <div class="field">
+            <label for="requestType">Talep Turu</label>
+            <select id="requestType">
+              <option value="Evrak">Evrak</option>
+              <option value="Satin Alma">Satin Alma</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="requestPriority">Oncelik</label>
+            <select id="requestPriority">
+              <option value="Normal">Normal</option>
+              <option value="Yuksek">Yuksek</option>
+              <option value="Kritik">Kritik</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="requestUnit">Gonderen Departman</label>
+            <select id="requestUnit">
+              <option value="Bilgi Teknolojileri">Bilgi Teknolojileri</option>
+              <option value="Insan Kaynaklari">Insan Kaynaklari</option>
+              <option value="Hukuk">Hukuk</option>
+              <option value="Idari Isler">Idari Isler</option>
+              <option value="Satin Alma">Satin Alma</option>
+              <option value="Finans">Finans</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="requestDocNo">Belge / Talep No</label>
+            <input id="requestDocNo" type="text" placeholder="Orn: SAT-2026-120">
+          </div>
+          <div class="field full">
+            <label for="requestTitle">Belge / Talep Basligi</label>
+            <input id="requestTitle" type="text" placeholder="Orn: Yazilim Lisansi Yenileme Talebi">
+          </div>
+          <div class="field full">
+            <label for="requestDesc">Aciklama</label>
+            <textarea id="requestDesc" placeholder="Talebin kisa aciklamasini girin..."></textarea>
+          </div>
+        </div>
+
+        <div class="step-builder">
+          <h3>Onay Adimi Ekle</h3>
+          <div class="step-grid">
+            <div class="field">
+              <label for="stepDepartment">Departman</label>
+              <select id="stepDepartment"></select>
+            </div>
+            <div class="field">
+              <label for="stepPerson">Onaylayacak Kisi</label>
+              <select id="stepPerson"></select>
+            </div>
+            <div class="field">
+              <label for="stepRole">Rol</label>
+              <input id="stepRole" type="text" placeholder="Orn: Mudur">
+            </div>
+            <div class="field" style="align-self:end;">
+              <button id="addStepBtn" class="btn btn-primary" type="button">Adim Ekle</button>
+            </div>
+          </div>
+
+          <div>
+            <span class="badge" id="stepCount">0 Adim Tanimli</span>
+          </div>
+
+          <div class="step-list" id="stepList">
+            <p class="empty">Henuz onay adimi eklenmedi.</p>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="startProcessBtn" class="btn btn-start" type="button">Onay Surecini Baslat</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <header class="card-header">
+        <h2>Canli Onizleme</h2>
+        <p class="subtitle">Talep kayit edilmeden once rota ve ozet bu alanda gorunur.</p>
+      </header>
+
+      <div class="preview-section">
+        <div class="summary" id="previewSummary">
+          <p><b>Talep:</b> -</p>
+          <p><b>Tur:</b> -</p>
+          <p><b>Departman:</b> -</p>
+          <p><b>Oncelik:</b> -</p>
+          <p><b>Belge/Talep No:</b> -</p>
+        </div>
+
+        <div class="flow" id="previewFlow">
+          <p class="empty">Onizleme icin en az 1 onay adimi ekleyin.</p>
+        </div>
+
+        <p class="preview-note" id="previewNote">Reddedilen talepler revize edilerek tekrar onay surecine alinabilir.</p>
+      </div>
+    </section>
+  </main>
+
+  <div class="version-badge" id="versionBadge">v-</div>
+
+  <script src="./auth.js"></script>
+  <script>
+    const APP_VERSION = "v1.4.3";
+    const ACTIVE_KEY = "onay-zinciri-aktif-talepler";
+    const ORGANIZATION_KEY = "onay-zinciri-organizasyon";
+
+    const departmentPeopleDefault = {
+      "Bilgi Teknolojileri": ["Gizem Yaman", "Cenk Ersoy", "Ali Ozkan"],
+      "Insan Kaynaklari": ["Derya Korkmaz", "Erdem Cetin", "Melis Ak"],
+      "Hukuk": ["Merve Akin", "Levent Saglam", "Seda Ucan"],
+      "Idari Isler": ["Buse Kilic", "Sinan Can", "Aylin Ozturk"],
+      "Satin Alma": ["Pelin Acar", "Yasemin Duran", "Furkan Demir"],
+      "Finans": ["Murat Usta", "Selin Yildiz", "Asli Sonmez"]
+    };
+
+    const stepDepartment = document.getElementById("stepDepartment");
+    const stepPerson = document.getElementById("stepPerson");
+    const stepRole = document.getElementById("stepRole");
+    const addStepBtn = document.getElementById("addStepBtn");
+    const stepList = document.getElementById("stepList");
+    const stepCount = document.getElementById("stepCount");
+    const startProcessBtn = document.getElementById("startProcessBtn");
+    const previewSummary = document.getElementById("previewSummary");
+    const previewFlow = document.getElementById("previewFlow");
+    const previewNote = document.getElementById("previewNote");
+    const versionBadge = document.getElementById("versionBadge");
+    const session = AppAuth.requireSession({ allowedRoles: ["employee", "manager"] });
+    if (!session) {
+      throw new Error("Session bulunamadi.");
+    }
+    AppAuth.renderTopNav({ containerId: "roleNav", active: "talep", session });
+
+    const requestType = document.getElementById("requestType");
+    const requestPriority = document.getElementById("requestPriority");
+    const requestUnit = document.getElementById("requestUnit");
+    const requestDocNo = document.getElementById("requestDocNo");
+    const requestTitle = document.getElementById("requestTitle");
+    const requestDesc = document.getElementById("requestDesc");
+
+    const steps = [];
+
+    function loadJson(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return fallback;
+        return JSON.parse(raw);
+      } catch {
+        return fallback;
+      }
+    }
+
+    function normalizeType(type) {
+      return type === "Satin Alma" ? "satinalma" : "evrak";
+    }
+
+    function ensureUniqueId(existing, preferredId) {
+      const known = new Set(existing.map(item => item.id));
+      if (!known.has(preferredId)) return preferredId;
+      let i = 2;
+      let next = `${preferredId}-${i}`;
+      while (known.has(next)) {
+        i += 1;
+        next = `${preferredId}-${i}`;
+      }
+      return next;
+    }
+
+    function generateAutoId(type) {
+      const prefix = type === "Satin Alma" ? "SAT" : "EVR";
+      const now = Date.now().toString().slice(-6);
+      return `${prefix}-${now}`;
+    }
+
+    let departmentPeople = loadJson(ORGANIZATION_KEY, null);
+    if (!departmentPeople || typeof departmentPeople !== "object" || Array.isArray(departmentPeople) || Object.keys(departmentPeople).length === 0) {
+      departmentPeople = JSON.parse(JSON.stringify(departmentPeopleDefault));
+      localStorage.setItem(ORGANIZATION_KEY, JSON.stringify(departmentPeople));
+    }
+
+    function initDepartments() {
+      const departments = Object.keys(departmentPeople);
+
+      requestUnit.innerHTML = departments
+        .map(dep => `<option value="${dep}">${dep}</option>`)
+        .join("");
+
+      stepDepartment.innerHTML = departments
+        .map(dep => `<option value="${dep}">${dep}</option>`)
+        .join("");
+
+      syncPeopleOptions();
+    }
+
+    function syncPeopleOptions() {
+      const dep = stepDepartment.value;
+      const people = departmentPeople[dep] || [];
+      stepPerson.innerHTML = people.map(person => `<option value="${person}">${person}</option>`).join("");
+    }
+
+    function renderSteps() {
+      stepCount.textContent = `${steps.length} Adim Tanimli`;
+
+      if (steps.length === 0) {
+        stepList.innerHTML = '<p class="empty">Henuz onay adimi eklenmedi.</p>';
+        return;
+      }
+
+      stepList.innerHTML = steps.map((step, index) => `
+        <article class="step-item">
+          <div class="step-no">${index + 1}</div>
+          <div class="step-meta">
+            <p>${step.person} - ${step.role}</p>
+            <p>${step.department}</p>
+          </div>
+          <div class="step-actions">
+            <button class="mini" data-action="up" data-index="${index}" type="button">Yukari</button>
+            <button class="mini" data-action="down" data-index="${index}" type="button">Asagi</button>
+            <button class="mini delete" data-action="delete" data-index="${index}" type="button">Sil</button>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function addStep() {
+      const role = stepRole.value.trim();
+      if (!role) {
+        alert("Lutfen rol alanini doldurun.");
+        return;
+      }
+      if (!stepDepartment.value || !stepPerson.value) {
+        alert("Secili departmanda onaylayacak kisi bulunmuyor.");
+        return;
+      }
+
+      steps.push({
+        department: stepDepartment.value,
+        person: stepPerson.value,
+        role
+      });
+
+      stepRole.value = "";
+      renderSteps();
+      renderPreview();
+    }
+
+    function moveStep(index, direction) {
+      const target = direction === "up" ? index - 1 : index + 1;
+      if (target < 0 || target >= steps.length) return;
+
+      const temp = steps[index];
+      steps[index] = steps[target];
+      steps[target] = temp;
+      renderSteps();
+      renderPreview();
+    }
+
+    function removeStep(index) {
+      steps.splice(index, 1);
+      renderSteps();
+      renderPreview();
+    }
+
+    function buildPayload() {
+      return {
+        talepTuru: requestType.value,
+        oncelik: requestPriority.value,
+        gonderenDepartman: requestUnit.value,
+        belgeTalepNo: requestDocNo.value.trim(),
+        baslik: requestTitle.value.trim(),
+        aciklama: requestDesc.value.trim(),
+        redSonrasiModel: "revize-ile-tekrar-onay",
+        onayRotasi: steps.map((step, index) => ({
+          sira: index + 1,
+          departman: step.department,
+          kisi: step.person,
+          rol: step.role,
+          durum: index === 0 ? "bekleyen-ilk-adim" : "sirada"
+        })),
+        olusturulmaTarihi: new Date().toLocaleString("tr-TR")
+      };
+    }
+
+    function renderPreview() {
+      const payload = buildPayload();
+
+      previewSummary.innerHTML = `
+        <p><b>Talep:</b> ${payload.baslik || "(Baslik girilmedi)"}</p>
+        <p><b>Tur:</b> ${payload.talepTuru || "-"}</p>
+        <p><b>Departman:</b> ${payload.gonderenDepartman || "-"}</p>
+        <p><b>Oncelik:</b> ${payload.oncelik || "-"}</p>
+        <p><b>Belge/Talep No:</b> ${payload.belgeTalepNo || "(Otomatik olusturulacak)"}</p>
+      `;
+
+      if (payload.onayRotasi.length === 0) {
+        previewFlow.innerHTML = '<p class="empty">Onizleme icin en az 1 onay adimi ekleyin.</p>';
+      } else {
+        previewFlow.innerHTML = payload.onayRotasi.map(adim => `
+          <article class="flow-item">
+            <div class="flow-dot">${adim.sira}</div>
+            <div>
+              <p>${adim.kisi} - ${adim.rol}</p>
+              <p>${adim.departman} - Durum: ${adim.durum}</p>
+            </div>
+          </article>
+        `).join("");
+      }
+
+      previewNote.textContent = "Reddedilen talepler revize edilerek tekrar onay surecine alinabilir.";
+    }
+
+    function payloadToQueueItem(payload, existingList) {
+      const preferredId = payload.belgeTalepNo || generateAutoId(payload.talepTuru);
+      const finalId = ensureUniqueId(existingList, preferredId);
+
+      return {
+        id: finalId,
+        type: normalizeType(payload.talepTuru),
+        title: payload.baslik,
+        unit: payload.gonderenDepartman,
+        createdAt: new Date().toLocaleString("tr-TR"),
+        policy: {
+          onReject: "revizeVeTekrarOnay"
+        },
+        steps: payload.onayRotasi.map((step, index) => ({
+          person: step.kisi,
+          role: step.rol,
+          status: index === 0 ? "current" : "pending",
+          date: "",
+          note: index === 0 ? "Onay bekliyor." : "Sirada bekliyor."
+        }))
+      };
+    }
+
+    function startApprovalProcess() {
+      const payload = buildPayload();
+
+      if (!payload.baslik) {
+        alert("Onay surecini baslatmak icin talep basligi girin.");
+        return;
+      }
+
+      if (payload.onayRotasi.length === 0) {
+        alert("Onay surecini baslatmak icin en az 1 onay adimi ekleyin.");
+        return;
+      }
+
+      const activeList = loadJson(ACTIVE_KEY, []);
+      const queueItem = payloadToQueueItem(payload, activeList);
+      activeList.unshift(queueItem);
+
+      localStorage.setItem(ACTIVE_KEY, JSON.stringify(activeList));
+
+      alert("Onay sureci baslatildi. Takip ekranina yonlendiriliyorsunuz.");
+      window.location.href = session.role === "manager" ? "./yonetici-paneli.html" : "./index.html";
+    }
+
+    stepDepartment.addEventListener("change", syncPeopleOptions);
+    addStepBtn.addEventListener("click", addStep);
+    startProcessBtn.addEventListener("click", startApprovalProcess);
+
+    stepList.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-action]");
+      if (!button) return;
+
+      const index = Number(button.dataset.index);
+      const action = button.dataset.action;
+      if (action === "up") moveStep(index, "up");
+      if (action === "down") moveStep(index, "down");
+      if (action === "delete") removeStep(index);
+    });
+
+    [requestType, requestPriority, requestUnit, requestDocNo, requestTitle, requestDesc].forEach(el => {
+      el.addEventListener("input", renderPreview);
+      el.addEventListener("change", renderPreview);
+    });
+
+    versionBadge.textContent = `Surum ${APP_VERSION}`;
+    initDepartments();
+    renderSteps();
+    renderPreview();
+  </script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Giris | Dijital Onay Zinciri</title>
+  <style>
+    :root {
+      --bg: #eef3ff;
+      --panel: #ffffff;
+      --ink: #1c2642;
+      --muted: #5f6e8f;
+      --line: #d4dfff;
+      --accent: #2f63ff;
+      --accent-soft: #dfe8ff;
+      --bad: #b63443;
+      --shadow: 0 16px 32px rgba(47, 99, 255, 0.15);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Century Gothic", "Candara", "Trebuchet MS", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1000px 480px at 0% -15%, #d7e6ff 0%, transparent 65%),
+        radial-gradient(860px 420px at 100% -10%, #ffe7d1 0%, transparent 65%),
+        var(--bg);
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .login-shell {
+      width: min(480px, 100%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .head {
+      padding: 20px 20px 14px;
+      border-bottom: 1px dashed var(--line);
+      background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.36rem;
+      letter-spacing: .2px;
+    }
+
+    .subtitle {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    form {
+      padding: 16px 20px 20px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 11px;
+      font-size: 0.92rem;
+      color: var(--ink);
+      background: #fff;
+      outline: none;
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(47, 99, 255, 0.14);
+    }
+
+    .btn {
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.86rem;
+      cursor: pointer;
+      transition: .2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(47, 99, 255, 0.25);
+    }
+
+    .error {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--bad);
+      min-height: 18px;
+    }
+
+    .version-badge {
+      position: fixed;
+      right: 12px;
+      bottom: 10px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid #c9d6ff;
+      background: rgba(255, 255, 255, 0.92);
+      color: #3452a4;
+      font-size: 0.76rem;
+      font-weight: 700;
+      backdrop-filter: blur(3px);
+      z-index: 20;
+    }
+  </style>
+</head>
+<body>
+  <main class="login-shell">
+    <header class="head">
+      <h1>Dijital Onay Zinciri Girisi</h1>
+      <p class="subtitle">Rolunuze gore ilgili ekranlar otomatik acilir.</p>
+    </header>
+
+    <form id="loginForm">
+      <div class="field">
+        <label for="username">Kullanici Adi Soyadi</label>
+        <input id="username" name="username" type="text" autocomplete="username" placeholder="Ad soyad girin" required>
+      </div>
+
+      <div class="field">
+        <label for="password">Sifre</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Sifrenizi girin" required>
+      </div>
+
+      <p id="errorText" class="error"></p>
+
+      <button class="btn" type="submit">Giris Yap</button>
+
+    </form>
+  </main>
+
+  <div class="version-badge" id="versionBadge">v-</div>
+
+  <script src="./auth.js"></script>
+  <script>
+    const APP_VERSION = "v1.4.3";
+
+    const loginForm = document.getElementById("loginForm");
+    const username = document.getElementById("username");
+    const password = document.getElementById("password");
+    const errorText = document.getElementById("errorText");
+    const versionBadge = document.getElementById("versionBadge");
+
+    const existingSession = AppAuth.getSession();
+    if (existingSession) {
+      window.location.href = AppAuth.getHomeForRole(existingSession.role);
+    }
+
+    loginForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      errorText.textContent = "";
+
+      const session = AppAuth.authenticate(username.value, password.value);
+      if (!session) {
+        errorText.textContent = "Kullanici adi veya sifre gecersiz.";
+        return;
+      }
+
+      AppAuth.setSession(session);
+      window.location.href = AppAuth.getHomeForRole(session.role);
+    });
+
+    versionBadge.textContent = `Surum ${APP_VERSION}`;
+  </script>
+</body>
+</html>

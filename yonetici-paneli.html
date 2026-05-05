@@ -1,0 +1,1040 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Yonetici Takip | Dijital Onay Zinciri</title>
+  <style>
+    :root {
+      --bg: #f4f7ff;
+      --panel: #ffffff;
+      --ink: #1b1f3b;
+      --muted: #6b7192;
+      --ok: #19a874;
+      --warn: #f3a719;
+      --bad: #e34d59;
+      --line: #dbe3ff;
+      --accent: #2763ff;
+      --accent-soft: #dfe8ff;
+      --shadow: 0 10px 30px rgba(39, 99, 255, 0.12);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Century Gothic", "Candara", "Trebuchet MS", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 600px at 20% -10%, #d8e6ff 0%, transparent 70%),
+        radial-gradient(1000px 500px at 100% 0%, #ffe8d8 0%, transparent 65%),
+        var(--bg);
+      min-height: 100vh;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    .top-nav {
+      max-width: 1200px;
+      margin: 0 auto 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .nav-link {
+      text-decoration: none;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      transition: .2s ease;
+    }
+
+    .nav-link:hover {
+      transform: translateY(-1px);
+      border-color: #b9caff;
+      background: #f5f8ff;
+    }
+
+    .nav-link.active {
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-color: #aac2ff;
+    }
+
+    .nav-spacer {
+      flex: 1 1 auto;
+    }
+
+    .nav-user {
+      align-self: center;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 0 4px;
+    }
+
+    .nav-btn {
+      appearance: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.35fr);
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+
+    .left-panel,
+    .right-panel {
+      padding: 20px;
+    }
+
+    h1 { margin: 0; font-size: 1.3rem; letter-spacing: 0.2px; }
+
+    .subtitle {
+      margin: 4px 0 12px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .filter-wrap {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      background: #f8faff;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: .2s ease;
+    }
+
+    .chip.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .org-manage-btn {
+      border: 1px solid #b9caff;
+      background: #eef3ff;
+      color: #274ca8;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+
+    .org-modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(18, 29, 68, 0.28);
+      z-index: 40;
+      padding: 14px;
+    }
+
+    .org-modal.show {
+      display: flex;
+    }
+
+    .org-modal-card {
+      width: min(520px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .org-modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      background: #f8fbff;
+    }
+
+    .org-modal-title {
+      margin: 0;
+      font-size: 0.96rem;
+    }
+
+    .org-close {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: #4a577e;
+      padding: 6px 9px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .org-modal-body {
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .org-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+    }
+
+    .org-input,
+    .org-select {
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 8px 10px;
+      font-size: 0.84rem;
+      width: 100%;
+    }
+
+    .org-btn {
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: #fff;
+      color: var(--ink);
+      padding: 8px 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .org-btn-danger {
+      border-color: #f2bcc2;
+      background: #fff2f4;
+      color: #9d2030;
+    }
+
+    .org-btn-info {
+      border-color: #bdd0ff;
+      background: #f2f6ff;
+      color: #274ca8;
+    }
+
+    .org-people {
+      display: grid;
+      gap: 6px;
+      max-height: 220px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .org-person {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: #fff;
+      padding: 7px 9px;
+      font-size: 0.82rem;
+    }
+
+    .org-person-name {
+      align-self: center;
+      overflow-wrap: anywhere;
+      font-weight: 700;
+    }
+
+    .org-person-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .org-password {
+      grid-column: 1 / -1;
+      display: none;
+      border: 1px dashed #bdd0ff;
+      border-radius: 8px;
+      background: #f8fbff;
+      color: #243963;
+      padding: 7px 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .org-password.show {
+      display: block;
+    }
+
+    .request-list {
+      display: grid;
+      gap: 10px;
+      max-height: 72vh;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .request-item {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 14px;
+      padding: 12px;
+      cursor: pointer;
+      transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+    }
+
+    .request-item:hover {
+      transform: translateY(-1px);
+      border-color: #b9caff;
+      box-shadow: 0 8px 18px rgba(32, 71, 194, 0.12);
+    }
+
+    .request-item.active {
+      border-color: var(--accent);
+      background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%);
+    }
+
+    .request-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 5px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: #fcfdff;
+      letter-spacing: .2px;
+    }
+
+    .status-pill {
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 5px 9px;
+      border-radius: 999px;
+      color: #fff;
+      letter-spacing: .15px;
+    }
+
+    .status-approved { background: var(--ok); }
+    .status-progress { background: var(--warn); color: #35270b; }
+    .status-rejected { background: var(--bad); }
+
+    .request-name {
+      margin: 0 0 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .meta {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.79rem;
+    }
+
+    .progress-wrap {
+      margin-top: 9px;
+      height: 8px;
+      border-radius: 999px;
+      background: #edf2ff;
+      overflow: hidden;
+    }
+
+    .progress {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #2e6dff 0%, #76a1ff 100%);
+    }
+
+    .right-header {
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px dashed var(--line);
+    }
+
+    .right-header h2 { margin: 0; font-size: 1.2rem; }
+    .right-header p { margin: 6px 0 0; color: var(--muted); font-size: 0.9rem; }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .summary-box {
+      border: 1px solid var(--line);
+      background: #f9fbff;
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .summary-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .summary-value {
+      margin: 0;
+      font-size: 0.94rem;
+      font-weight: 700;
+    }
+
+    .timeline { display: grid; gap: 12px; }
+
+    .step {
+      display: grid;
+      grid-template-columns: 30px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+    }
+
+    .dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--line);
+      display: grid;
+      place-content: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      background: #fff;
+      color: var(--muted);
+      position: relative;
+      margin-top: 2px;
+    }
+
+    .dot::after {
+      content: "";
+      position: absolute;
+      width: 2px;
+      height: 36px;
+      background: var(--line);
+      top: 28px;
+      left: calc(50% - 1px);
+    }
+
+    .step:last-child .dot::after { display: none; }
+    .dot.done { background: #e9fff6; color: #067f54; border-color: #8be4bd; }
+    .dot.current { background: #fff7e8; color: #8f5a02; border-color: #ffd28a; }
+    .dot.reject { background: #ffecee; color: #ad2030; border-color: #f6a4ae; }
+
+    .step-card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      background: #fff;
+    }
+
+    .step-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .person { margin: 0; font-size: 0.92rem; font-weight: 700; }
+    .role { margin: 0; color: var(--muted); font-size: 0.8rem; }
+
+    .decision {
+      margin: 6px 0 0;
+      font-size: 0.82rem;
+      color: #36416a;
+    }
+
+    .empty {
+      margin: 20px 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.92rem;
+      border: 1px dashed var(--line);
+      padding: 12px;
+      border-radius: 10px;
+      background: #fcfdff;
+    }
+
+    .version-badge {
+      position: fixed;
+      right: 12px;
+      bottom: 10px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid #c9d6ff;
+      background: rgba(255, 255, 255, 0.92);
+      color: #3452a4;
+      font-size: 0.76rem;
+      font-weight: 700;
+      backdrop-filter: blur(3px);
+      z-index: 20;
+    }
+
+    @media (max-width: 1180px) {
+      .container { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 980px) {
+      body { padding: 14px; }
+      .request-list { max-height: 40vh; }
+      .summary-grid { grid-template-columns: 1fr; }
+      .org-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="top-nav" id="roleNav"></nav>
+
+  <main class="container">
+    <section class="card left-panel">
+      <h1>Yonetici Onay Takip</h1>
+      <p class="subtitle">Tum talepleri, takilan adimlari ve onay gecmisini izleyin.</p>
+
+      <button id="openPeopleManagerBtn" class="org-manage-btn" type="button">Calisan Yonetimi</button>
+
+      <div class="filter-wrap" id="filters">
+        <button class="chip active" data-filter="all">Tumu</button>
+        <button class="chip" data-filter="evrak">Evrak</button>
+        <button class="chip" data-filter="satinalma">Satin Alma</button>
+        <button class="chip" data-filter="inProgress">Beklemede</button>
+      </div>
+
+      <div class="request-list" id="requestList"></div>
+    </section>
+
+    <section class="card right-panel">
+      <div class="right-header">
+        <h2 id="detailTitle">Talep Secin</h2>
+        <p id="detailSub">Soldan bir kayit secerek kimde takildigini ve onay akisinin detayini goruntuleyin.</p>
+      </div>
+
+      <div class="summary-grid">
+        <div class="summary-box">
+          <span class="summary-label">Mevcut Durum</span>
+          <p class="summary-value" id="sumStatus">-</p>
+        </div>
+        <div class="summary-box">
+          <span class="summary-label">Su An Kimde</span>
+          <p class="summary-value" id="sumHolder">-</p>
+        </div>
+        <div class="summary-box">
+          <span class="summary-label">Tamamlanma</span>
+          <p class="summary-value" id="sumProgress">-</p>
+        </div>
+      </div>
+
+      <div class="timeline" id="timeline"></div>
+    </section>
+  </main>
+
+  <div id="peopleManagerModal" class="org-modal" aria-hidden="true">
+    <div class="org-modal-card" role="dialog" aria-modal="true" aria-label="Calisan Yonetimi">
+      <div class="org-modal-head">
+        <h3 class="org-modal-title">Calisan Yonetimi</h3>
+        <button id="closePeopleManagerBtn" class="org-close" type="button">Kapat</button>
+      </div>
+      <div class="org-modal-body">
+        <div class="org-row">
+          <select id="orgDeptSelect" class="org-select"></select>
+        </div>
+        <div class="org-row">
+          <input id="orgPersonInput" class="org-input" type="text" placeholder="Secili departmana kisi ekle">
+          <button id="addPersonBtn" class="org-btn" type="button">Kisi Ekle</button>
+        </div>
+        <div id="orgPeopleList" class="org-people"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="version-badge" id="versionBadge">v-</div>
+
+  <script src="./auth.js"></script>
+  <script>
+    const APP_VERSION = "v1.4.3";
+    const STORE_KEY = "onay-zinciri-kayitlar";
+    const INCOMING_KEY = "onay-zinciri-aktif-talepler";
+    const ORGANIZATION_KEY = "onay-zinciri-organizasyon";
+
+    const DEFAULT_ORGANIZATION = {
+      "Bilgi Teknolojileri": ["Gizem Yaman", "Cenk Ersoy", "Ali Ozkan"],
+      "Insan Kaynaklari": ["Derya Korkmaz", "Erdem Cetin", "Melis Ak"],
+      "Hukuk": ["Merve Akin", "Levent Saglam", "Seda Ucan"],
+      "Idari Isler": ["Buse Kilic", "Sinan Can", "Aylin Ozturk"],
+      "Satin Alma": ["Pelin Acar", "Yasemin Duran", "Furkan Demir"],
+      "Finans": ["Murat Usta", "Selin Yildiz", "Asli Sonmez"]
+    };
+
+    const BASE_REQUESTS = [
+      {
+        id: "EVR-2026-041",
+        type: "evrak",
+        title: "Sozlesme Revizyon Yazisi",
+        unit: "Hukuk Birimi",
+        createdAt: "05.05.2026 09:10",
+        policy: { onReject: "revizeVeTekrarOnay" },
+        steps: [
+          { person: "Merve Akin", role: "Uzman", status: "approved", date: "05.05.2026 09:22", note: "Belge kontrol edildi." },
+          { person: "Levent Saglam", role: "Birim Sorumlusu", status: "approved", date: "05.05.2026 09:48", note: "Uygun bulundu." },
+          { person: "Selin Yildiz", role: "Mali Isler", status: "current", date: "", note: "Incelemede, beklemede." },
+          { person: "Omer Tunc", role: "Genel Mudur Yardimcisi", status: "pending", date: "", note: "Sirada bekliyor." }
+        ]
+      },
+      {
+        id: "SAT-2026-118",
+        type: "satinalma",
+        title: "Lisans Yenileme Talebi",
+        unit: "Bilgi Teknolojileri",
+        createdAt: "04.05.2026 14:35",
+        policy: { onReject: "revizeVeTekrarOnay" },
+        steps: [
+          { person: "Gizem Yaman", role: "BT Uzmmani", status: "approved", date: "04.05.2026 14:40", note: "Talep acildi." },
+          { person: "Cenk Ersoy", role: "BT Muduru", status: "approved", date: "04.05.2026 15:05", note: "Ihtiyac dogrulandi." },
+          { person: "Yasemin Duran", role: "Satin Alma", status: "approved", date: "04.05.2026 16:10", note: "Teklif alimi tamamlandi." },
+          { person: "Murat Usta", role: "Finans Direktoru", status: "approved", date: "04.05.2026 17:00", note: "Butce onaylandi." }
+        ]
+      },
+      {
+        id: "SAT-2026-119",
+        type: "satinalma",
+        title: "Ofis Mobilyasi Alimi",
+        unit: "Idari Isler",
+        createdAt: "05.05.2026 10:20",
+        policy: { onReject: "revizeVeTekrarOnay" },
+        steps: [
+          { person: "Buse Kilic", role: "Idari Isler Uzmmani", status: "approved", date: "05.05.2026 10:26", note: "Talep acildi." },
+          { person: "Sinan Can", role: "Idari Isler Muduru", status: "rejected", date: "05.05.2026 10:44", note: "Miktar guncellemesi istendi." },
+          { person: "Pelin Acar", role: "Satin Alma", status: "pending", date: "", note: "Revize bekleniyor." },
+          { person: "Murat Usta", role: "Finans Direktoru", status: "pending", date: "", note: "Sirada bekliyor." }
+        ]
+      },
+      {
+        id: "EVR-2026-042",
+        type: "evrak",
+        title: "Yurt Ici Gorevlendirme Formu",
+        unit: "Insan Kaynaklari",
+        createdAt: "05.05.2026 08:55",
+        policy: { onReject: "revizeVeTekrarOnay" },
+        steps: [
+          { person: "Derya Korkmaz", role: "IK Uzmmani", status: "approved", date: "05.05.2026 09:00", note: "Evrak dogrulandi." },
+          { person: "Erdem Cetin", role: "IK Muduru", status: "current", date: "", note: "Onay bekliyor." },
+          { person: "Nese Bulut", role: "Genel Mudur", status: "pending", date: "", note: "Sirada bekliyor." }
+        ]
+      }
+    ];
+
+    const statusMap = {
+      approved: { text: "Onaylandi", cls: "status-approved" },
+      current: { text: "Beklemede", cls: "status-progress" },
+      pending: { text: "Sirada", cls: "status-progress" },
+      rejected: { text: "Reddedildi", cls: "status-rejected" }
+    };
+
+    let activeFilter = "all";
+    let selectedId = "";
+
+    const requestList = document.getElementById("requestList");
+    const filters = document.getElementById("filters");
+    const detailTitle = document.getElementById("detailTitle");
+    const detailSub = document.getElementById("detailSub");
+    const sumStatus = document.getElementById("sumStatus");
+    const sumHolder = document.getElementById("sumHolder");
+    const sumProgress = document.getElementById("sumProgress");
+    const timeline = document.getElementById("timeline");
+    const versionBadge = document.getElementById("versionBadge");
+    const openPeopleManagerBtn = document.getElementById("openPeopleManagerBtn");
+    const closePeopleManagerBtn = document.getElementById("closePeopleManagerBtn");
+    const peopleManagerModal = document.getElementById("peopleManagerModal");
+    const orgDeptSelect = document.getElementById("orgDeptSelect");
+    const orgPersonInput = document.getElementById("orgPersonInput");
+    const addPersonBtn = document.getElementById("addPersonBtn");
+    const orgPeopleList = document.getElementById("orgPeopleList");
+    const session = AppAuth.requireSession({ allowedRoles: ["manager"] });
+    if (!session) {
+      throw new Error("Session bulunamadi.");
+    }
+    AppAuth.renderTopNav({ containerId: "roleNav", active: "manager", session });
+    let selectedOrgDepartment = "";
+
+    function clone(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    function safeParse(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return fallback;
+        return JSON.parse(raw);
+      } catch {
+        return fallback;
+      }
+    }
+
+    function loadOrganization() {
+      const org = safeParse(ORGANIZATION_KEY, null);
+      const normalized = {};
+
+      Object.keys(DEFAULT_ORGANIZATION).forEach(dep => {
+        const source = org && Array.isArray(org[dep]) ? org[dep] : DEFAULT_ORGANIZATION[dep];
+        normalized[dep] = Array.from(new Set(
+          source
+            .map(item => String(item || "").trim())
+            .filter(Boolean)
+        ));
+      });
+
+      localStorage.setItem(ORGANIZATION_KEY, JSON.stringify(normalized));
+      return normalized;
+    }
+
+    let organization = loadOrganization();
+    AppAuth.ensureEmployeePasswords();
+
+    function saveOrganization() {
+      localStorage.setItem(ORGANIZATION_KEY, JSON.stringify(organization));
+      AppAuth.ensureEmployeePasswords();
+      renderOrganizationManager();
+    }
+
+    function renderOrganizationManager() {
+      const departments = Object.keys(organization);
+
+      if (!departments.length) {
+        orgDeptSelect.innerHTML = "<option value=\"\">Departman yok</option>";
+        orgPeopleList.innerHTML = '<p class="empty">Kayitli kisi yok.</p>';
+        selectedOrgDepartment = "";
+        return;
+      }
+
+      if (!selectedOrgDepartment || !organization[selectedOrgDepartment]) {
+        selectedOrgDepartment = departments[0];
+      }
+
+      orgDeptSelect.innerHTML = departments
+        .map(dep => `<option value="${dep}" ${dep === selectedOrgDepartment ? "selected" : ""}>${dep}</option>`)
+        .join("");
+
+      const people = organization[selectedOrgDepartment] || [];
+      if (!people.length) {
+        orgPeopleList.innerHTML = '<p class="empty">Bu departmanda kisi yok.</p>';
+      } else {
+        orgPeopleList.innerHTML = people.map(person => `
+          <div class="org-person">
+            <span class="org-person-name">${person}</span>
+            <div class="org-person-actions">
+              <button type="button" class="org-btn org-btn-info" data-show-password="${person}">Bilgi</button>
+              <button type="button" class="org-btn org-btn-danger" data-remove-person="${person}">Sil</button>
+            </div>
+            <div class="org-password" data-password-box="${person}"></div>
+          </div>
+        `).join("");
+      }
+    }
+
+    function showEmployeePassword(person) {
+      const box = orgPeopleList.querySelector(`[data-password-box="${person}"]`);
+      if (!box) return;
+
+      const isVisible = box.classList.contains("show");
+      orgPeopleList.querySelectorAll(".org-password.show").forEach(item => item.classList.remove("show"));
+
+      if (!isVisible) {
+        box.textContent = `Sifre: ${AppAuth.getEmployeePassword(person)}`;
+        box.classList.add("show");
+      }
+    }
+
+    function addPersonToDepartment() {
+      const dep = orgDeptSelect.value;
+      const person = orgPersonInput.value.trim();
+      if (!dep || !organization[dep]) return;
+      if (!person) return;
+
+      const exists = (organization[dep] || []).some(p => p.toLowerCase() === person.toLowerCase());
+      if (exists) {
+        alert("Bu kisi bu departmanda zaten var.");
+        return;
+      }
+
+      organization[dep].push(person);
+      organization[dep].sort((a, b) => a.localeCompare(b, "tr"));
+      orgPersonInput.value = "";
+      localStorage.setItem(ORGANIZATION_KEY, JSON.stringify(organization));
+      AppAuth.createEmployeePassword(person);
+      saveOrganization();
+    }
+
+    function removePersonFromDepartment(person) {
+      const dep = orgDeptSelect.value;
+      if (!dep || !organization[dep]) return;
+      organization[dep] = organization[dep].filter(p => p !== person);
+      AppAuth.removeEmployeePassword(person);
+      saveOrganization();
+    }
+
+    function openPeopleManager() {
+      peopleManagerModal.classList.add("show");
+      peopleManagerModal.setAttribute("aria-hidden", "false");
+      orgPersonInput.focus();
+    }
+
+    function closePeopleManager() {
+      peopleManagerModal.classList.remove("show");
+      peopleManagerModal.setAttribute("aria-hidden", "true");
+    }
+
+    function normalizeRequest(raw) {
+      if (!raw || !raw.id || !Array.isArray(raw.steps)) return null;
+      return {
+        id: String(raw.id),
+        type: raw.type === "satinalma" ? "satinalma" : "evrak",
+        title: raw.title || "Basliksiz Talep",
+        unit: raw.unit || "-",
+        createdAt: raw.createdAt || "-",
+        policy: raw.policy || { onReject: "revizeVeTekrarOnay" },
+        returnContext: raw.returnContext && typeof raw.returnContext === "object" ? raw.returnContext : null,
+        steps: raw.steps.map(step => ({
+          person: step.person || "-",
+          role: step.role || "-",
+          status: statusMap[step.status] ? step.status : "pending",
+          date: step.date || "",
+          note: step.note || "-"
+        }))
+      };
+    }
+
+    function loadRequests() {
+      const stored = safeParse(STORE_KEY, null);
+      let merged = Array.isArray(stored) ? stored.map(normalizeRequest).filter(Boolean) : clone(BASE_REQUESTS);
+
+      const incoming = safeParse(INCOMING_KEY, []);
+      if (Array.isArray(incoming)) {
+        incoming.map(normalizeRequest).filter(Boolean).forEach(item => {
+          if (!merged.find(r => r.id === item.id)) {
+            merged.unshift(item);
+          }
+        });
+      }
+
+      localStorage.setItem(STORE_KEY, JSON.stringify(merged));
+      return merged;
+    }
+
+    const requests = loadRequests();
+
+    function getOverallStatus(item) {
+      if (item.returnContext?.active) return "current";
+
+      const hasRejected = item.steps.some(step => step.status === "rejected");
+      if (hasRejected) return "rejected";
+
+      const allApproved = item.steps.every(step => step.status === "approved");
+      if (allApproved) return "approved";
+
+      return "current";
+    }
+
+    function getCurrentHolder(item) {
+      if (item.returnContext?.active) {
+        const currentInReturn = item.steps.find(step => step.status === "current");
+        if (currentInReturn) return `${currentInReturn.person} (${currentInReturn.role})`;
+      }
+
+      const rejected = item.steps.find(step => step.status === "rejected");
+      if (rejected) return `${rejected.person} (${rejected.role})`;
+
+      const current = item.steps.find(step => step.status === "current");
+      if (current) return `${current.person} (${current.role})`;
+
+      const pending = item.steps.find(step => step.status === "pending");
+      if (pending) return `${pending.person} (${pending.role})`;
+
+      return "Surec tamamlandi";
+    }
+
+    function getProgress(item) {
+      const approvedCount = item.steps.filter(step => step.status === "approved").length;
+      return Math.round((approvedCount / item.steps.length) * 100);
+    }
+
+    function filterItems() {
+      if (activeFilter === "all") return requests;
+      if (activeFilter === "inProgress") return requests.filter(item => getOverallStatus(item) === "current");
+      return requests.filter(item => item.type === activeFilter);
+    }
+
+    function clearDetails() {
+      detailTitle.textContent = "Kayit bulunamadi";
+      detailSub.textContent = "Farkli bir filtre secerek listeyi tekrar goruntuleyin.";
+      sumStatus.textContent = "-";
+      sumHolder.textContent = "-";
+      sumProgress.textContent = "-";
+      timeline.innerHTML = '<p class="empty">Detay bulunmuyor.</p>';
+    }
+
+    function renderDetails(id) {
+      const item = requests.find(r => r.id === id);
+      if (!item) {
+        clearDetails();
+        return;
+      }
+
+      const status = getOverallStatus(item);
+      const statusText = statusMap[status].text;
+      const progress = getProgress(item);
+      const returnText = item.returnContext?.active
+        ? ` • Geri donus nedeni: ${item.returnContext.reason}`
+        : "";
+
+      detailTitle.textContent = `${item.title} (${item.id})`;
+      detailSub.textContent = `${item.unit} tarafindan olusturuldu • ${item.createdAt}${returnText}`;
+      sumStatus.textContent = statusText;
+      sumHolder.textContent = getCurrentHolder(item);
+      sumProgress.textContent = `${progress}%`;
+
+      timeline.innerHTML = item.steps.map((step, index) => {
+        let dotClass = "";
+        if (step.status === "approved") dotClass = "done";
+        if (step.status === "current" || step.status === "pending") dotClass = "current";
+        if (step.status === "rejected") dotClass = "reject";
+
+        const badge = statusMap[step.status]?.text || "-";
+        const dateInfo = step.date ? ` • ${step.date}` : "";
+
+        return `
+          <div class="step">
+            <div class="dot ${dotClass}">${index + 1}</div>
+            <div class="step-card">
+              <div class="step-head">
+                <div>
+                  <p class="person">${step.person}</p>
+                  <p class="role">${step.role}</p>
+                </div>
+                <span class="status-pill ${statusMap[step.status].cls}">${badge}</span>
+              </div>
+              <p class="decision">${step.note}${dateInfo}</p>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderList() {
+      const items = filterItems();
+      if (!items.find(item => item.id === selectedId) && items.length > 0) {
+        selectedId = items[0].id;
+      }
+
+      if (items.length === 0) {
+        requestList.innerHTML = '<p class="empty">Secili filtrede kayit bulunamadi.</p>';
+        clearDetails();
+        return;
+      }
+
+      requestList.innerHTML = items.map(item => {
+        const status = getOverallStatus(item);
+        const statusInfo = statusMap[status];
+        const progress = getProgress(item);
+        const isActive = item.id === selectedId ? "active" : "";
+        const typeLabel = item.type === "evrak" ? "Evrak" : "Satin Alma";
+
+        return `
+          <article class="request-item ${isActive}" data-id="${item.id}">
+            <div class="request-top">
+              <span class="tag">${typeLabel} • ${item.id}</span>
+              <span class="status-pill ${statusInfo.cls}">${statusInfo.text}</span>
+            </div>
+            <p class="request-name">${item.title}</p>
+            <p class="meta">${item.unit} • ${item.createdAt}</p>
+            <p class="meta">Su an: ${getCurrentHolder(item)}</p>
+            <div class="progress-wrap">
+              <div class="progress" style="width:${progress}%"></div>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      renderDetails(selectedId);
+    }
+
+    filters.addEventListener("click", (e) => {
+      const button = e.target.closest("button[data-filter]");
+      if (!button) return;
+      document.querySelectorAll(".chip").forEach(chip => chip.classList.remove("active"));
+      button.classList.add("active");
+      activeFilter = button.dataset.filter;
+      renderList();
+    });
+
+    requestList.addEventListener("click", (e) => {
+      const item = e.target.closest(".request-item");
+      if (!item) return;
+      selectedId = item.dataset.id;
+      renderList();
+    });
+
+    openPeopleManagerBtn.addEventListener("click", openPeopleManager);
+    closePeopleManagerBtn.addEventListener("click", closePeopleManager);
+    addPersonBtn.addEventListener("click", addPersonToDepartment);
+    orgDeptSelect.addEventListener("change", () => {
+      selectedOrgDepartment = orgDeptSelect.value;
+      renderOrganizationManager();
+    });
+    peopleManagerModal.addEventListener("click", (e) => {
+      if (e.target === peopleManagerModal) closePeopleManager();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && peopleManagerModal.classList.contains("show")) {
+        closePeopleManager();
+      }
+    });
+    orgPeopleList.addEventListener("click", (e) => {
+      const infoButton = e.target.closest("button[data-show-password]");
+      if (infoButton) {
+        showEmployeePassword(infoButton.dataset.showPassword);
+        return;
+      }
+
+      const button = e.target.closest("button[data-remove-person]");
+      if (!button) return;
+      removePersonFromDepartment(button.dataset.removePerson);
+    });
+
+    versionBadge.textContent = `Surum ${APP_VERSION}`;
+    renderOrganizationManager();
+    renderList();
+  </script>
+</body>
+</html>

@@ -1,0 +1,952 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Onay Kutum | Dijital Onay Zinciri</title>
+  <style>
+    :root {
+      --bg: #f4f7ff;
+      --panel: #ffffff;
+      --ink: #1b1f3b;
+      --muted: #6b7192;
+      --ok: #19a874;
+      --warn: #f3a719;
+      --bad: #e34d59;
+      --line: #dbe3ff;
+      --accent: #2763ff;
+      --accent-soft: #dfe8ff;
+      --shadow: 0 10px 30px rgba(39, 99, 255, 0.12);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Century Gothic", "Candara", "Trebuchet MS", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 600px at 20% -10%, #d8e6ff 0%, transparent 70%),
+        radial-gradient(1000px 500px at 100% 0%, #ffe8d8 0%, transparent 65%),
+        var(--bg);
+      min-height: 100vh;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    .top-nav {
+      max-width: 1200px;
+      margin: 0 auto 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .nav-link {
+      text-decoration: none;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      transition: .2s ease;
+    }
+
+    .nav-link:hover {
+      transform: translateY(-1px);
+      border-color: #b9caff;
+      background: #f5f8ff;
+    }
+
+    .nav-link.active {
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-color: #aac2ff;
+    }
+
+    .nav-spacer {
+      flex: 1 1 auto;
+    }
+
+    .nav-user {
+      align-self: center;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 0 4px;
+    }
+
+    .nav-btn {
+      appearance: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.35fr);
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+
+    .left-panel,
+    .right-panel {
+      padding: 20px;
+    }
+
+    .title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    h1 { margin: 0; font-size: 1.3rem; letter-spacing: 0.2px; }
+
+    .subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .user-box {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: #f8fbff;
+      margin-bottom: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .user-box label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .active-user {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #273a6f;
+    }
+
+    select {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 9px 10px;
+      font-size: 0.9rem;
+      width: 100%;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .summary-box {
+      border: 1px solid var(--line);
+      background: #f9fbff;
+      border-radius: 10px;
+      padding: 9px;
+    }
+
+    .summary-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .summary-value {
+      margin: 0;
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    .request-list {
+      display: grid;
+      gap: 10px;
+      max-height: 64vh;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .request-item {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 14px;
+      padding: 12px;
+      transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+    }
+
+    .request-item.active {
+      border-color: var(--accent);
+      background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%);
+    }
+
+    .request-item:hover {
+      transform: translateY(-1px);
+      border-color: #b9caff;
+      box-shadow: 0 8px 18px rgba(32, 71, 194, 0.12);
+    }
+
+    .request-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 5px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: #fcfdff;
+      letter-spacing: .2px;
+    }
+
+    .request-name {
+      margin: 0 0 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .meta {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.79rem;
+    }
+
+    .status-pill {
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 5px 9px;
+      border-radius: 999px;
+      letter-spacing: .15px;
+      border: 1px solid transparent;
+    }
+
+    .status-pill-wait {
+      color: #35270b;
+      background: #ffe8bd;
+      border: 1px solid #ffd48a;
+    }
+
+    .status-pill-revise {
+      color: #8f1d2c;
+      background: #ffe7ea;
+      border: 1px solid #f4b4bd;
+    }
+
+    .quick-note {
+      width: 100%;
+      min-height: 56px;
+      margin-top: 8px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px;
+      font-size: 0.82rem;
+      font-family: inherit;
+      resize: vertical;
+    }
+
+    .quick-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .mini-btn {
+      border: 1px solid transparent;
+      border-radius: 9px;
+      padding: 7px 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .mini-approve {
+      background: #e8fff2;
+      border-color: #9be4be;
+      color: #056d44;
+    }
+
+    .mini-reject {
+      background: #fff1f2;
+      border-color: #f3b5bc;
+      color: #9d1f30;
+    }
+
+    .right-header {
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px dashed var(--line);
+    }
+
+    .right-header h2 { margin: 0; font-size: 1.2rem; }
+    .right-header p { margin: 6px 0 0; color: var(--muted); font-size: 0.9rem; }
+
+    .detail-box {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfdff;
+      padding: 12px;
+      margin-bottom: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .detail-box p {
+      margin: 0;
+      font-size: 0.86rem;
+      color: #2f3f6f;
+    }
+
+    .timeline { display: grid; gap: 12px; }
+
+    .step {
+      display: grid;
+      grid-template-columns: 30px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+    }
+
+    .dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--line);
+      display: grid;
+      place-content: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      background: #fff;
+      color: var(--muted);
+      position: relative;
+      margin-top: 2px;
+    }
+
+    .dot::after {
+      content: "";
+      position: absolute;
+      width: 2px;
+      height: 36px;
+      background: var(--line);
+      top: 28px;
+      left: calc(50% - 1px);
+    }
+
+    .step:last-child .dot::after { display: none; }
+    .dot.done { background: #e9fff6; color: #067f54; border-color: #8be4bd; }
+    .dot.current { background: #fff7e8; color: #8f5a02; border-color: #ffd28a; }
+    .dot.reject { background: #ffecee; color: #ad2030; border-color: #f6a4ae; }
+
+    .step-card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      background: #fff;
+    }
+
+    .step-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .person { margin: 0; font-size: 0.92rem; font-weight: 700; }
+    .role { margin: 0; color: var(--muted); font-size: 0.8rem; }
+
+    .status-approved { background: var(--ok); color: #fff; }
+    .status-progress { background: var(--warn); color: #35270b; }
+    .status-rejected { background: var(--bad); color: #fff; }
+
+    .decision {
+      margin: 6px 0 0;
+      font-size: 0.82rem;
+      color: #36416a;
+    }
+
+    .action-box {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .action-box label {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 74px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 0.88rem;
+      font-family: inherit;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-approve {
+      background: #e8fff2;
+      border-color: #9be4be;
+      color: #056d44;
+    }
+
+    .btn-reject {
+      background: #fff1f2;
+      border-color: #f3b5bc;
+      color: #9d1f30;
+    }
+
+    .empty {
+      margin: 20px 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.92rem;
+      border: 1px dashed var(--line);
+      padding: 12px;
+      border-radius: 10px;
+      background: #fcfdff;
+    }
+
+    .version-badge {
+      position: fixed;
+      right: 12px;
+      bottom: 10px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid #c9d6ff;
+      background: rgba(255, 255, 255, 0.92);
+      color: #3452a4;
+      font-size: 0.76rem;
+      font-weight: 700;
+      backdrop-filter: blur(3px);
+      z-index: 20;
+    }
+
+    @media (max-width: 1180px) {
+      .container { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 980px) {
+      body { padding: 14px; }
+      .request-list { max-height: 40vh; }
+      .summary-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="top-nav" id="roleNav"></nav>
+
+  <main class="container">
+    <section class="card left-panel">
+      <div class="title-row">
+        <div>
+          <h1>Kullanici Onay Kutusu</h1>
+          <p class="subtitle">Sadece sana gelen bekleyen evraklar burada listelenir.</p>
+        </div>
+      </div>
+
+      <div class="user-box">
+        <label>Aktif Kullanici</label>
+        <p class="active-user" id="activeUserName">-</p>
+      </div>
+
+      <div class="summary-grid">
+        <div class="summary-box">
+          <span class="summary-label">Bekleyen Evrak</span>
+          <p class="summary-value" id="sumPending">0</p>
+        </div>
+        <div class="summary-box">
+          <span class="summary-label">Onayladiklarim</span>
+          <p class="summary-value" id="sumApproved">0</p>
+        </div>
+        <div class="summary-box">
+          <span class="summary-label">Reddettiklerim</span>
+          <p class="summary-value" id="sumRejected">0</p>
+        </div>
+      </div>
+
+      <div class="request-list" id="requestList"></div>
+    </section>
+
+    <section class="card right-panel">
+      <div class="right-header">
+        <h2 id="detailTitle">Evrak Secin</h2>
+        <p id="detailSub">Soldan evrak secip durum guncellemesi yapabilirsiniz.</p>
+      </div>
+
+      <div class="action-box" id="actionBox" style="display:none;">
+        <label for="decisionNote">Karar Notu (opsiyonel)</label>
+        <textarea id="decisionNote" placeholder="Onay veya red icin kisa not yazabilirsiniz..."></textarea>
+        <div class="action-buttons">
+          <button class="btn btn-approve" id="approveBtn" type="button">Onayla</button>
+          <button class="btn btn-reject" id="rejectBtn" type="button">Reddet</button>
+        </div>
+      </div>
+
+      <div class="detail-box" id="detailMeta"></div>
+      <div class="timeline" id="timeline"></div>
+    </section>
+  </main>
+
+  <div class="version-badge" id="versionBadge">v-</div>
+
+  <script src="./auth.js"></script>
+  <script>
+    const APP_VERSION = "v1.4.3";
+    const STORE_KEY = "onay-zinciri-kayitlar";
+    const INCOMING_KEY = "onay-zinciri-aktif-talepler";
+
+    const BASE_REQUESTS = [
+      {
+        id: "EVR-2026-041",
+        type: "evrak",
+        title: "Sozlesme Revizyon Yazisi",
+        unit: "Hukuk Birimi",
+        createdAt: "05.05.2026 09:10",
+        policy: { onReject: "revizeVeTekrarOnay" },
+        steps: [
+          { person: "Merve Akin", role: "Uzman", status: "approved", date: "05.05.2026 09:22", note: "Belge kontrol edildi." },
+          { person: "Levent Saglam", role: "Birim Sorumlusu", status: "approved", date: "05.05.2026 09:48", note: "Uygun bulundu." },
+          { person: "Selin Yildiz", role: "Mali Isler", status: "current", date: "", note: "Incelemede, beklemede." },
+          { person: "Omer Tunc", role: "Genel Mudur Yardimcisi", status: "pending", date: "", note: "Sirada bekliyor." }
+        ]
+      },
+      {
+        id: "SAT-2026-118",
+        type: "satinalma",
+        title: "Lisans Yenileme Talebi",
+        unit: "Bilgi Teknolojileri",
+        createdAt: "04.05.2026 14:35",
+        policy: { onReject: "revizeVeTekrarOnay" },
+        steps: [
+          { person: "Gizem Yaman", role: "BT Uzmmani", status: "approved", date: "04.05.2026 14:40", note: "Talep acildi." },
+          { person: "Cenk Ersoy", role: "BT Muduru", status: "approved", date: "04.05.2026 15:05", note: "Ihtiyac dogrulandi." },
+          { person: "Yasemin Duran", role: "Satin Alma", status: "approved", date: "04.05.2026 16:10", note: "Teklif alimi tamamlandi." },
+          { person: "Murat Usta", role: "Finans Direktoru", status: "approved", date: "04.05.2026 17:00", note: "Butce onaylandi." }
+        ]
+      },
+      {
+        id: "SAT-2026-119",
+        type: "satinalma",
+        title: "Ofis Mobilyasi Alimi",
+        unit: "Idari Isler",
+        createdAt: "05.05.2026 10:20",
+        policy: { onReject: "revizeVeTekrarOnay" },
+        steps: [
+          { person: "Buse Kilic", role: "Idari Isler Uzmmani", status: "approved", date: "05.05.2026 10:26", note: "Talep acildi." },
+          { person: "Sinan Can", role: "Idari Isler Muduru", status: "rejected", date: "05.05.2026 10:44", note: "Miktar guncellemesi istendi." },
+          { person: "Pelin Acar", role: "Satin Alma", status: "pending", date: "", note: "Revize bekleniyor." },
+          { person: "Murat Usta", role: "Finans Direktoru", status: "pending", date: "", note: "Sirada bekliyor." }
+        ]
+      },
+      {
+        id: "EVR-2026-042",
+        type: "evrak",
+        title: "Yurt Ici Gorevlendirme Formu",
+        unit: "Insan Kaynaklari",
+        createdAt: "05.05.2026 08:55",
+        policy: { onReject: "revizeVeTekrarOnay" },
+        steps: [
+          { person: "Derya Korkmaz", role: "IK Uzmmani", status: "approved", date: "05.05.2026 09:00", note: "Evrak dogrulandi." },
+          { person: "Erdem Cetin", role: "IK Muduru", status: "current", date: "", note: "Onay bekliyor." },
+          { person: "Nese Bulut", role: "Genel Mudur", status: "pending", date: "", note: "Sirada bekliyor." }
+        ]
+      }
+    ];
+
+    const statusMap = {
+      approved: { text: "Onaylandi", cls: "status-approved" },
+      current: { text: "Beklemede", cls: "status-progress" },
+      pending: { text: "Sirada", cls: "status-progress" },
+      rejected: { text: "Reddedildi", cls: "status-rejected" }
+    };
+
+    let requests = [];
+    let selectedUser = "";
+    let selectedRequestId = "";
+
+    const session = AppAuth.requireSession({ allowedRoles: ["employee"] });
+    if (!session) {
+      throw new Error("Session bulunamadi.");
+    }
+
+    AppAuth.renderTopNav({ containerId: "roleNav", active: "inbox", session });
+
+    const activeUserName = document.getElementById("activeUserName");
+    const requestList = document.getElementById("requestList");
+    const detailTitle = document.getElementById("detailTitle");
+    const detailSub = document.getElementById("detailSub");
+    const detailMeta = document.getElementById("detailMeta");
+    const timeline = document.getElementById("timeline");
+    const actionBox = document.getElementById("actionBox");
+    const decisionNote = document.getElementById("decisionNote");
+    const approveBtn = document.getElementById("approveBtn");
+    const rejectBtn = document.getElementById("rejectBtn");
+    const sumPending = document.getElementById("sumPending");
+    const sumApproved = document.getElementById("sumApproved");
+    const sumRejected = document.getElementById("sumRejected");
+    const versionBadge = document.getElementById("versionBadge");
+
+    function clone(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    function safeParse(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return fallback;
+        const parsed = JSON.parse(raw);
+        return parsed;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function normalizeRequest(raw) {
+      if (!raw || !raw.id || !Array.isArray(raw.steps)) return null;
+      return {
+        id: String(raw.id),
+        type: raw.type === "satinalma" ? "satinalma" : "evrak",
+        title: raw.title || "Basliksiz Talep",
+        unit: raw.unit || "-",
+        createdAt: raw.createdAt || "-",
+        policy: raw.policy || { onReject: "revizeVeTekrarOnay" },
+        returnContext: raw.returnContext && typeof raw.returnContext === "object" ? raw.returnContext : null,
+        steps: raw.steps.map(step => ({
+          person: step.person || "-",
+          role: step.role || "-",
+          status: statusMap[step.status] ? step.status : "pending",
+          date: step.date || "",
+          note: step.note || "-"
+        }))
+      };
+    }
+
+    function loadRequests() {
+      const stored = safeParse(STORE_KEY, null);
+      let merged = Array.isArray(stored) ? stored.map(normalizeRequest).filter(Boolean) : clone(BASE_REQUESTS);
+
+      const incoming = safeParse(INCOMING_KEY, []);
+      if (Array.isArray(incoming)) {
+        incoming.map(normalizeRequest).filter(Boolean).forEach(item => {
+          if (!merged.find(r => r.id === item.id)) {
+            merged.unshift(item);
+          }
+        });
+      }
+
+      localStorage.setItem(STORE_KEY, JSON.stringify(merged));
+      return merged;
+    }
+
+    function saveRequests() {
+      localStorage.setItem(STORE_KEY, JSON.stringify(requests));
+    }
+
+    function getCurrentStepInfo(req) {
+      const index = req.steps.findIndex(step => step.status === "current");
+      if (index === -1) return null;
+      return { index, step: req.steps[index] };
+    }
+
+    function getInboxItems() {
+      return requests.filter(req => {
+        const currentInfo = getCurrentStepInfo(req);
+        return currentInfo && currentInfo.step.person === selectedUser;
+      });
+    }
+
+    function renderSummary(inboxItems) {
+      const allMySteps = requests.flatMap(req => req.steps.filter(step => step.person === selectedUser));
+      const approvedCount = allMySteps.filter(step => step.status === "approved").length;
+      const rejectedCount = allMySteps.filter(step => step.status === "rejected").length;
+
+      sumPending.textContent = String(inboxItems.length);
+      sumApproved.textContent = String(approvedCount);
+      sumRejected.textContent = String(rejectedCount);
+    }
+
+    function renderList() {
+      const inboxItems = getInboxItems();
+      renderSummary(inboxItems);
+
+      if (!inboxItems.find(item => item.id === selectedRequestId) && inboxItems.length > 0) {
+        selectedRequestId = inboxItems[0].id;
+      }
+
+      if (inboxItems.length === 0) {
+        requestList.innerHTML = '<p class="empty">Bu kullaniciya atanmis bekleyen evrak bulunmuyor.</p>';
+        clearDetails();
+        return;
+      }
+
+      requestList.innerHTML = inboxItems.map(item => {
+        const currentInfo = getCurrentStepInfo(item);
+        const isActive = item.id === selectedRequestId ? "active" : "";
+        const typeLabel = item.type === "evrak" ? "Evrak" : "Satin Alma";
+        const isReturned = item.returnContext?.active === true;
+        const statusLabel = isReturned ? "Revize Bekleniyor" : "Bekleyen Onay";
+        const statusClass = isReturned ? "status-pill-revise" : "status-pill-wait";
+
+        return `
+          <article class="request-item ${isActive}" data-id="${item.id}">
+            <div class="request-head">
+              <span class="tag">${typeLabel}  -  ${item.id}</span>
+              <span class="status-pill ${statusClass}">${statusLabel}</span>
+            </div>
+            <p class="request-name">${item.title}</p>
+            <p class="meta">${item.unit}  -  ${item.createdAt}</p>
+            <p class="meta">Adim ${currentInfo.index + 1}/${item.steps.length}</p>
+            <textarea class="quick-note" data-note-id="${item.id}" placeholder="Hizli karar notu (opsiyonel)..."></textarea>
+            <div class="quick-actions">
+              <button class="mini-btn mini-approve" type="button" data-action="quick-approve" data-id="${item.id}">Onayla</button>
+              <button class="mini-btn mini-reject" type="button" data-action="quick-reject" data-id="${item.id}">Reddet</button>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      renderDetails(selectedRequestId);
+    }
+
+    function clearDetails() {
+      detailTitle.textContent = "Evrak secin";
+      detailSub.textContent = "Soldan evrak secip durum guncellemesi yapabilirsiniz.";
+      detailMeta.innerHTML = '<p>Detay gosterilemedi.</p>';
+      timeline.innerHTML = '<p class="empty">Detay bulunmuyor.</p>';
+      actionBox.style.display = "none";
+      decisionNote.value = "";
+    }
+
+    function renderDetails(id) {
+      const inboxItems = getInboxItems();
+      const item = inboxItems.find(req => req.id === id);
+      if (!item) {
+        clearDetails();
+        return;
+      }
+
+      const currentInfo = getCurrentStepInfo(item);
+      detailTitle.textContent = `${item.title} (${item.id})`;
+      detailSub.textContent = `${item.unit} tarafindan olusturuldu  -  ${item.createdAt}`;
+      const returnReasonLine = item.returnContext?.active
+        ? `<p><b>Geri Donus Nedeni:</b> ${item.returnContext.reason}</p>`
+        : "";
+
+      detailMeta.innerHTML = `
+        <p><b>Aktif Adim:</b> ${currentInfo.index + 1}/${item.steps.length}</p>
+        <p><b>Aksiyon Sahibi:</b> ${currentInfo.step.person} (${currentInfo.step.role})</p>
+
+        ${returnReasonLine}
+      `;
+
+      timeline.innerHTML = item.steps.map((step, index) => {
+        let dotClass = "";
+        if (step.status === "approved") dotClass = "done";
+        if (step.status === "current" || step.status === "pending") dotClass = "current";
+        if (step.status === "rejected") dotClass = "reject";
+
+        const badge = statusMap[step.status]?.text || "-";
+        const dateInfo = step.date ? `  -  ${step.date}` : "";
+
+        return `
+          <div class="step">
+            <div class="dot ${dotClass}">${index + 1}</div>
+            <div class="step-card">
+              <div class="step-head">
+                <div>
+                  <p class="person">${step.person}</p>
+                  <p class="role">${step.role}</p>
+                </div>
+                <span class="status-pill ${statusMap[step.status].cls}">${badge}</span>
+              </div>
+              <p class="decision">${step.note}${dateInfo}</p>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      actionBox.style.display = "grid";
+      decisionNote.value = "";
+    }
+
+    function applyDecision(action, requestId = selectedRequestId, externalNote = "") {
+      const request = requests.find(req => req.id === requestId);
+      if (!request) return;
+
+      const currentInfo = getCurrentStepInfo(request);
+      if (!currentInfo) return;
+
+      if (currentInfo.step.person !== selectedUser) {
+        alert("Bu evrak su anda sizin isleminize acik degil.");
+        return;
+      }
+
+      const note = (externalNote || decisionNote.value || "").trim();
+      const stamp = new Date().toLocaleString("tr-TR");
+
+      if (action === "approve") {
+        currentInfo.step.status = "approved";
+        currentInfo.step.date = stamp;
+        currentInfo.step.note = note || "Onaylandi.";
+
+        const shouldKeepReturnReason =
+          request.returnContext?.active &&
+          currentInfo.index < request.returnContext.rejectedStepIndex;
+
+        if (request.returnContext?.active && currentInfo.index >= request.returnContext.rejectedStepIndex) {
+          request.returnContext = null;
+        }
+
+        const nextStep = request.steps[currentInfo.index + 1];
+        if (nextStep) {
+          nextStep.status = "current";
+          if (shouldKeepReturnReason && request.returnContext?.active) {
+            nextStep.note = `Geri donus nedeniyle tekrar onay bekliyor. Neden: ${request.returnContext.reason}`;
+          } else if (!nextStep.note || nextStep.note.toLowerCase().includes("sirada")) {
+            nextStep.note = "Onay bekliyor.";
+          } else if (!shouldKeepReturnReason) {
+            nextStep.note = "Onay bekliyor.";
+          }
+        }
+
+        if (!nextStep) {
+          request.returnContext = null;
+        }
+      }
+
+      if (action === "reject") {
+        const rejectionReason = note || "Reddedildi. Revize bekleniyor.";
+
+        if (request.steps.length > 1 && currentInfo.index > 0) {
+          const rejectedBy = currentInfo.step.person;
+          const rejectedAtStep = currentInfo.index + 1;
+          const rollbackNote = `${rejectedBy} tarafindan ${rejectedAtStep}. adimda red verildi. Neden: ${rejectionReason}`;
+
+          request.returnContext = {
+            active: true,
+            reason: rejectionReason,
+            rejectedBy,
+            rejectedStepIndex: currentInfo.index,
+            timestamp: stamp
+          };
+
+          request.steps.forEach((step, index) => {
+            step.date = "";
+
+            if (index === 0) {
+              step.status = "current";
+              step.note = `Geri donus onayi bekleniyor. ${rollbackNote}`;
+              return;
+            }
+
+            if (index < currentInfo.index) {
+              step.status = "pending";
+              step.note = `Sirasiyla tekrar onaylanacak. ${rollbackNote}`;
+              return;
+            }
+
+            if (index === currentInfo.index) {
+              step.status = "pending";
+              step.note = `Red verdi. Onceki adimlarin yeniden onayi bekleniyor. Neden: ${rejectionReason}`;
+              return;
+            }
+
+            step.status = "pending";
+            if (!step.note || step.note.toLowerCase().includes("sirada")) {
+              step.note = "Onceki adimlar tamamlandiktan sonra siraya girecek.";
+            }
+          });
+        } else {
+          request.returnContext = null;
+          currentInfo.step.status = "rejected";
+          currentInfo.step.date = stamp;
+          currentInfo.step.note = rejectionReason;
+        }
+      }
+
+      saveRequests();
+      renderList();
+    }
+
+    requestList.addEventListener("click", (e) => {
+      if (e.target.closest(".quick-note")) return;
+
+      const actionBtn = e.target.closest("button[data-action]");
+      if (actionBtn) {
+        const id = actionBtn.dataset.id;
+        const action = actionBtn.dataset.action;
+        const noteEl = requestList.querySelector(`textarea[data-note-id="${id}"]`);
+        const quickNote = noteEl ? noteEl.value : "";
+
+        if (action === "quick-approve") applyDecision("approve", id, quickNote);
+        if (action === "quick-reject") applyDecision("reject", id, quickNote);
+        return;
+      }
+
+      const item = e.target.closest(".request-item");
+      if (!item) return;
+      selectedRequestId = item.dataset.id;
+      renderList();
+    });
+
+    approveBtn.addEventListener("click", () => applyDecision("approve"));
+    rejectBtn.addEventListener("click", () => applyDecision("reject"));
+
+    versionBadge.textContent = `Surum ${APP_VERSION}`;
+    selectedUser = session.name;
+    activeUserName.textContent = session.name;
+    requests = loadRequests();
+    renderList();
+  </script>
+</body>
+</html>
